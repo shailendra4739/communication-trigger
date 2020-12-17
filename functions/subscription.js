@@ -37,7 +37,6 @@ exports.handler = async (event, context, cb) => {
 
         const { event: { op, data }, table: { name, schema } } = JSON.parse(event.body);
         const { created_by, modified_by, deleted, properties, package_id, apartment_id, start_date, end_date, log_remarks } = data.new;
-        console.log('data', data.new)
 
         const $payload = {
             created_by: created_by,
@@ -68,13 +67,12 @@ exports.handler = async (event, context, cb) => {
         };
 
         const response = await axios(config);
-        const package_response = response.data;
-        console.log(package_response);
+        const package_response = response.data.data;
+        console.log(package_response.vas_packages_by_pk?.subPackages);
 
         // const retSubPackages = package_response.vas_packages_by_pk.subPackages[0].id;
         let sub_package_ids = package_response.vas_packages_by_pk?.subPackages.map(subId => subId.id)
-        // sub_package_ids = [...new Set(sub_package_ids)];
-        console.log("sub_package_ids", sub_package_ids)
+        sub_package_ids = [...new Set(sub_package_ids)];
 
         const final_payload = [];
         for (let sub_package_id of sub_package_ids) {
@@ -82,7 +80,6 @@ exports.handler = async (event, context, cb) => {
         }
 
         console.log('final_payload', final_payload)
-
         if (op === 'INSERT') {
 
             const insert_data = JSON.stringify({
