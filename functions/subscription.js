@@ -36,7 +36,7 @@ exports.handler = async (event, context, cb) => {
     try {
 
         const { event: { op, data }, table: { name, schema } } = JSON.parse(event.body);
-        let { created_by, modified_by, deleted, properties, package_id, apartment_id, start_date, end_date, log_remarks } = data.new;
+            const { created_by, modified_by, deleted, properties, package_id, apartment_id, start_date, end_date, log_remarks } = data.new;
             
             const $payload = { 
                 created_by:  created_by,
@@ -49,30 +49,36 @@ exports.handler = async (event, context, cb) => {
                 log_remarks: log_remarks
             }
 
-        const qv = { id: package_id };
+            const qv = { id: package_id };
 
-        let data1 = JSON.stringify({
-            query: package_query,
-            variables: qv
-        });
+            const query_sub_package = JSON.stringify({
+                query: package_query,
+                variables: qv
+            });
 
-        let config = {
-            method: 'post',
-            url: process.env.HASURA_GQL_URL,
-            headers: {
-                'content-type': 'application/json',
-                'x-hasura-admin-secret': process.env.HASURA_ADMIN_SECRET
-            },
-            data: data1
-        };
+            const config = {
+                method: 'post',
+                url: process.env.HASURA_GQL_URL,
+                headers: {
+                    'content-type': 'application/json',
+                    'x-hasura-admin-secret': process.env.HASURA_ADMIN_SECRET
+                },
+                data: query_sub_package
+            };
 
-        const response = await axios(config);
-        const package_response = response.data.data;
-        console.log(package_response);
+            const response = await axios(config);
+            const package_response = response.data.data;
+            console.log(package_response);
 
-        const sub_package_id = package_response.vas_packages_by_pk.subPackages[0].id;
-        $payload.sub_package_id = sub_package_id;
-        //delete $payload.package_id;  // remove package_id from payload
+            // const retSubPackages = package_response.vas_packages_by_pk.subPackages[0].id;
+            const sub_package_ids = package_response.vas_packages_by_pk?.subPackages.map(subId => subId.id)
+            sub_package_ids = [...new Set(sub_package_ids)];
+            
+            const final_payload=[];
+            for(let sub_package_id of sub_package_ids) {
+                final_payload.push({...payload, sub_package_id: sub_package_id});
+            }
+            console.log('final_payload', final_payload)
 
         if (op === 'INSERT') {
 
