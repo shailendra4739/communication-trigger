@@ -72,13 +72,13 @@ exports.handler = async (event, context, cb) => {
         console.log(package_response);
 
         // const retSubPackages = package_response.vas_packages_by_pk.subPackages[0].id;
-        const sub_package_ids = package_response.vas_packages_by_pk?.subPackages.map(subId => subId.id)
+        let sub_package_ids = package_response.vas_packages_by_pk?.subPackages.map(subId => subId.id)
         // sub_package_ids = [...new Set(sub_package_ids)];
         console.log("sub_package_ids", sub_package_ids)
 
         const final_payload = [];
         for (let sub_package_id of sub_package_ids) {
-            final_payload.push({ ...payload, sub_package_id: sub_package_id });
+            final_payload.push({ ...$payload, sub_package_id: sub_package_id });
         }
 
         console.log('final_payload', final_payload)
