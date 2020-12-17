@@ -99,19 +99,12 @@ exports.handler = async (event, context, cb) => {
                 variables: { object: $payload, id: id }
             });
             
+            console.log("update id", id)
+            
             console.log("update_data", update_data)
             console.log("$payload", $payload)
 
-            config = {
-                method: 'post',
-                url: process.env.HASURA_GQL_URL,
-                headers: {
-                    'content-type': 'application/json',
-                    'x-hasura-admin-secret': process.env.HASURA_ADMIN_SECRET
-                },
-                data: update_data
-            };
-
+            config.data = update_data
             const updateSubSubscription = await axios(config);
             console.log(updateSubSubscription.data);
         }
