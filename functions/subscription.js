@@ -115,6 +115,10 @@ exports.handler = async (event, context, cb) => {
 
     }
     catch (err) {
-        console.log(err);
+        console.log(err.message);
+        cb({
+            statusCode: 500,
+            body: err.message
+        }, null);
     }
 }
