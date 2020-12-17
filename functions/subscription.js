@@ -75,7 +75,7 @@ exports.handler = async (event, context, cb) => {
             
             const final_payload=[];
             for(let sub_package_id of sub_package_ids) {
-                final_payload.push({...payload, sub_package_id: sub_package_id});
+                final_payload.push({...$payload, sub_package_id: sub_package_id});
             }
             console.log('final_payload', final_payload)
 
