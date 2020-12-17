@@ -68,7 +68,7 @@ exports.handler = async (event, context, cb) => {
 
         const response = await axios(config);
         const package_response = response.data.data;
-        console.log(res);
+        console.log(package_response);
 
         const sub_package_id = package_response.vas_packages_by_pk.subPackages[0].id;
         $payload.sub_package_id = sub_package_id;
