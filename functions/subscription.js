@@ -35,7 +35,7 @@ const update_sub_subsription = `mutation($object: vas_sub_subscriptions_set_inpu
 exports.handler = async (event, context, cb) => {
     try {
 
-        const { event: { op, data }, table: { name, schema } } = JSON.parse(event.body.payload);
+        const { event: { op, data }, table: { name, schema } } = JSON.parse(event.body);
         const { created_by, modified_by, deleted, properties, package_id, apartment_id, start_date, end_date, log_remarks } = data.new;
 
         let $payload = {
@@ -67,22 +67,25 @@ exports.handler = async (event, context, cb) => {
         };
 
         const response = await axios(config);
+        console.log(response)
         const package_response = response.data.data;
-        console.log(package_response.vas_packages_by_pk?.subPackages);
+        console.log(package_response.vas_packages_by_pk.subPackages);
 
         // const retSubPackages = package_response.vas_packages_by_pk.subPackages[0].id;
         let sub_package_ids = package_response.vas_packages_by_pk?.subPackages.map(subId => subId.id)
         sub_package_ids = [...new Set(sub_package_ids)];
 
+        console.log('sub_package_ids', sub_package_ids)
+        
         const final_payload = [];
         for (let sub_package_id of sub_package_ids) {
             final_payload.push({ ...$payload, sub_package_id: sub_package_id });
         }
-
         console.log('final_payload', final_payload)
+
         if (op === 'INSERT') {
 
-            const insert_data = JSON.stringify({
+            let insert_data = JSON.stringify({
                 query: inser_sub_subsription,
                 variables: { objects: final_payload }
             });
@@ -95,7 +98,7 @@ exports.handler = async (event, context, cb) => {
 
             const id = data.old.id;  // subscriptionId
 
-            const update_data = JSON.stringify({
+            let update_data = JSON.stringify({
                 query: update_sub_subsription,
                 variables: { object: final_payload, id: id }
             });
