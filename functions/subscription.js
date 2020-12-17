@@ -67,14 +67,11 @@ exports.handler = async (event, context, cb) => {
         };
 
         const response = await axios(config);
-        console.log(response)
         const package_response = response.data.data;
-        console.log(package_response.vas_packages_by_pk.subPackages);
 
         // const retSubPackages = package_response.vas_packages_by_pk.subPackages[0].id;
         let sub_package_ids = package_response.vas_packages_by_pk.subPackages.map(subId => subId.id)
-        // sub_package_ids = [...new Set(sub_package_ids)];
-
+        sub_package_ids = [...new Set(sub_package_ids)];
         console.log('sub_package_ids', sub_package_ids)
         
         const final_payload = [];
