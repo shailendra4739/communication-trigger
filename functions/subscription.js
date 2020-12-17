@@ -80,12 +80,17 @@ exports.handler = async (event, context, cb) => {
                 query: inser_sub_subsription,
                 variables: { objects: $payload }
             });
+            
+            console.log("insert_data", insert_data)
+            console.log("$payload", $payload)
 
             config.data = insert_data;
             const addSubSubscription = await axios(config);
             console.log(addSubSubscription.data);
 
         } else if (op === 'UPDATE') {
+        
+        
 
             const id = data.old.id;
 
@@ -93,6 +98,9 @@ exports.handler = async (event, context, cb) => {
                 query: update_sub_subsription,
                 variables: { object: $payload, id: id }
             });
+            
+            console.log("update_data", update_data)
+            console.log("$payload", $payload)
 
             config = {
                 method: 'post',
