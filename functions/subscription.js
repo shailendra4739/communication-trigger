@@ -35,7 +35,7 @@ const update_sub_subsription = `mutation($object: vas_sub_subscriptions_set_inpu
 exports.handler = async (event, context, cb) => {
     try {
 
-        const { event: { op, data }, table: { name, schema } } = JSON.parse(event.body);
+        const { event: { op, data }, table: { name, schema } } = JSON.parse(event.body.payload);
         const { created_by, modified_by, deleted, properties, package_id, apartment_id, start_date, end_date, log_remarks } = data.new;
 
         let $payload = {
