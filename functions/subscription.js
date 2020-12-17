@@ -83,11 +83,11 @@ exports.handler = async (event, context, cb) => {
 
             let insert_data = JSON.stringify({
                 query: inser_sub_subsription,
-                variables: { objects: $payload }
+                variables: { objects: final_payload }
             });
             
             console.log("insert_data", insert_data)
-            console.log("$payload", $payload)
+            console.log("$payload", final_payload)
 
             config.data = insert_data;
             const addSubSubscription = await axios(config);
@@ -101,7 +101,7 @@ exports.handler = async (event, context, cb) => {
 
             let update_data = JSON.stringify({
                 query: update_sub_subsription,
-                variables: { object: $payload, id: id }
+                variables: { object: final_payload, id: id }
             });
             
             console.log("update id", id)
