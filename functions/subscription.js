@@ -1,5 +1,6 @@
 const axios = require('axios');
 const moment=require('moment');
+require('dotenv').config()
 
 const package_query=`query($id: uuid!){
     vas_packages_by_pk(id: $id){
