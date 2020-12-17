@@ -38,7 +38,7 @@ exports.handler = async (event, context, cb) => {
         const { event: { op, data }, table: { name, schema } } = JSON.parse(event.body);
         const { created_by, modified_by, deleted, properties, package_id, apartment_id, start_date, end_date, log_remarks } = data.new;
 
-        const $payload = {
+        let $payload = {
             created_by: created_by,
             modified_by: modified_by,
             deleted: deleted,
@@ -56,7 +56,7 @@ exports.handler = async (event, context, cb) => {
             variables: qv
         });
 
-        let config = {
+        const config = {
             method: 'post',
             url: process.env.HASURA_GQL_URL,
             headers: {
