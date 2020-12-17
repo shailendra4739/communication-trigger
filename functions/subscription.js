@@ -1,8 +1,8 @@
 const axios = require('axios');
-const moment=require('moment');
+const moment = require('moment');
 require('dotenv').config()
 
-const package_query=`query($id: uuid!){
+const package_query = `query($id: uuid!){
     vas_packages_by_pk(id: $id){
         id
         name
@@ -36,79 +36,82 @@ exports.handler = async (event, context, cb) => {
     try {
 
         const { event: { op, data }, table: { name, schema } } = JSON.parse(event.body);
-            const { created_by, modified_by, deleted, properties, package_id, apartment_id, start_date, end_date, log_remarks } = data.new;
+        const { created_by, modified_by, deleted, properties, package_id, apartment_id, start_date, end_date, log_remarks } = data.new;
+        console.log('data', data.new)
 
-            const $payload = {
-                created_by: created_by,
-                modified_by: modified_by,
-                deleted: deleted,
-                properties: properties,
-                apartment_id: apartment_id,
-                start_date: start_date,
-                end_date: end_date,
-                log_remarks: log_remarks
-            }
+        const $payload = {
+            created_by: created_by,
+            modified_by: modified_by,
+            deleted: deleted,
+            properties: properties,
+            apartment_id: apartment_id,
+            start_date: start_date,
+            end_date: end_date,
+            log_remarks: log_remarks
+        }
 
-            const qv = { id: package_id };
+        const qv = { id: package_id };
 
-            const query_sub_package = JSON.stringify({
-                query: package_query,
-                variables: qv
+        const query_sub_package = JSON.stringify({
+            query: package_query,
+            variables: qv
+        });
+
+        let config = {
+            method: 'post',
+            url: process.env.HASURA_GQL_URL,
+            headers: {
+                'content-type': 'application/json',
+                'x-hasura-admin-secret': process.env.HASURA_ADMIN_SECRET
+            },
+            data: query_sub_package
+        };
+
+        const response = await axios(config);
+        const package_response = response.data;
+        console.log(package_response);
+
+        // const retSubPackages = package_response.vas_packages_by_pk.subPackages[0].id;
+        const sub_package_ids = package_response.vas_packages_by_pk?.subPackages.map(subId => subId.id)
+        // sub_package_ids = [...new Set(sub_package_ids)];
+        console.log("sub_package_ids", sub_package_ids)
+
+        const final_payload = [];
+        for (let sub_package_id of sub_package_ids) {
+            final_payload.push({ ...payload, sub_package_id: sub_package_id });
+        }
+
+        console.log('final_payload', final_payload)
+
+        if (op === 'INSERT') {
+
+            const insert_data = JSON.stringify({
+                query: inser_sub_subsription,
+                variables: { objects: final_payload }
             });
 
-            const config = {
-                method: 'post',
-                url: process.env.HASURA_GQL_URL,
-                headers: {
-                    'content-type': 'application/json',
-                    'x-hasura-admin-secret': process.env.HASURA_ADMIN_SECRET
-                },
-                data: query_sub_package
-            };
+            config.data = insert_data;
+            const addSubSubscription = await axios(config);
+            console.log(addSubSubscription.data);
 
-            const response = await axios(config);
-            const package_response = response.data;
-            console.log(package_response);
+        } else if (op === 'UPDATE') {
 
-            // const retSubPackages = package_response.vas_packages_by_pk.subPackages[0].id;
-            const sub_package_ids = package_response.vas_packages_by_pk?.subPackages.map(subId => subId.id)
-            sub_package_ids = [...new Set(sub_package_ids)];
+            const id = data.old.id;  // subscriptionId
 
-            const final_payload = [];
-            for (let sub_package_id of sub_package_ids) {
-                final_payload.push({ ...payload, sub_package_id: sub_package_id });
-            }
-            console.log('final_payload', final_payload)
-
-            if (op === 'INSERT') {
-
-                let insert_data = JSON.stringify({
-                    query: inser_sub_subsription,
-                    variables: { objects: final_payload }
-                });
-
-                config.data = insert_data;
-                const addSubSubscription = await axios(config);
-                console.log(addSubSubscription.data);
-
-            } else if (op === 'UPDATE') {
-
-                const id = data.old.id;  // subscriptionId
-
-                let update_data = JSON.stringify({
-                    query: update_sub_subsription,
-                    variables: { object: final_payload, id: id }
-                });
-
-                config.data = update_data;
-                const updateSubSubscription = await axios(config);
-                console.log(updateSubSubscription.data);
-            }
-
-            cb(null, {
-                statusCode: 200,
-                body: "success"
+            const update_data = JSON.stringify({
+                query: update_sub_subsription,
+                variables: { object: final_payload, id: id }
             });
+
+            config.data = update_data;
+            const updateSubSubscription = await axios(config);
+            console.log(updateSubSubscription.data);
+        }
+
+        cb(null, {
+            statusCode: 200,
+            body: "success"
+        });
 
     }
     catch (err) {
